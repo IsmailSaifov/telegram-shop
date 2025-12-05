@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Магазин</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-com</title>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-<div id="header">
-    <button id="backBtn" class="hidden">← Назад</button>
-    <h2 id="title">Категории</h2>
-    <button id="cartBtn">🛒</button>
-</div>
 
-<div id="content"></div>
+<header class="topbar">
+    <div class="logo">E-com</div>
+    <div id="cartBtn" class="cart-icon">🛒</div>
+</header>
+
+<section class="section-title">
+    <h2>Популярные товары</h2>
+    <p>Выберите товары и добавьте в корзину</p>
+</section>
+
+<div id="productGrid" class="product-grid"></div>
 
 <script src="app.js"></script>
 </body>

@@ -1,86 +1,118 @@
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-    background: var(--tg-theme-bg-color);
-    color: var(--tg-theme-text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--tg-theme-bg-color, #ffffff);
+    color: var(--tg-theme-text-color, #000000);
 }
 
-#header {
+/* ======== Верхняя панель ======== */
+.topbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
-    background: var(--tg-theme-secondary-bg-color);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    padding: 14px 16px;
+    background: #ffffffcc;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
 }
 
-#backBtn, #cartBtn {
-    background: none;
-    border: none;
-    font-size: 18px;
+.logo {
+    font-size: 20px;
+    font-weight: 600;
 }
 
-.hidden { display: none; }
+.cart-icon {
+    font-size: 20px;
+    cursor: pointer;
+}
 
-.grid {
-    padding: 12px;
+
+/* ======== Заголовок раздела ======== */
+.section-title {
+    padding: 16px;
+}
+
+.section-title h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.section-title p {
+    margin: 4px 0 0;
+    color: #777;
+}
+
+
+/* ======== Сетка товаров ======== */
+.product-grid {
     display: grid;
-    gap: 12px;
-}
-
-.grid.two {
     grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 0 12px 20px;
 }
 
-.card {
-    background: var(--tg-theme-secondary-bg-color);
-    border-radius: 12px;
-    padding: 10px;
-    text-align: center;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+/* ======== Карточка товара ======== */
+.product-card {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    padding-bottom: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
     transition: transform 0.15s ease;
 }
 
-.card:active {
-    transform: scale(0.95);
+.product-card:active {
+    transform: scale(0.97);
 }
 
-.card img {
+.product-card img {
     width: 100%;
-    border-radius: 10px;
+    height: 140px;
+    object-fit: cover;
 }
 
-.price {
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 5px;
+.product-info {
+    padding: 8px 10px;
 }
 
-.btn {
-    border: none;
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 10px;
-    background-color: #4CAF50;
-    color: white;
+.product-title {
     font-size: 16px;
+    font-weight: 600;
+    margin: 4px 0;
 }
 
-#productPage img {
-    width: 100%;
-    border-radius: 10px;
+.product-desc {
+    font-size: 13px;
+    color: #666;
+    height: 32px;
+    overflow: hidden;
 }
 
-#productPage {
-    padding: 12px;
+.product-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px 0;
 }
 
-.fade {
-    animation: fade 0.2s ease;
+.product-price {
+    font-size: 17px;
+    font-weight: bold;
 }
 
-@keyframes fade {
-    from { opacity: 0; }
-    to { opacity: 1; }
+.add-btn {
+    width: 34px;
+    height: 34px;
+    background: #007aff;
+    color: #fff;
+    border-radius: 50%;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+}
+
+.add-btn:active {
+    transform: scale(0.9);
 }
