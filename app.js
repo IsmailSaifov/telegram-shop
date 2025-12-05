@@ -1,31 +1,47 @@
 const tg = window.Telegram.WebApp;
-tg.expand();  // делаем приложение на весь экран
+tg.expand();
 
 let categories = [];
 let products = [];
 let cart = [];
 
-// =========================
-// 1. Запрос категорий из бота
-// =========================
-function loadCategories() {
-    tg.sendData(JSON.stringify({ action: "get_categories" }));
+const content = document.getElementById("content");
+const title = document.getElementById("title");
+const backBtn = document.getElementById("backBtn");
+const cartBtn = document.getElementById("cartBtn");
+
+// Навигационный стек
+let pageStack = [];
+
+
+/* === ПЕРЕХОД МЕЖДУ СТРАНИЦАМИ === */
+function navigateTo(pageFunction) {
+    pageStack.push(pageFunction);
+    pageFunction();
+    updateBackButton();
 }
 
-// =========================
-// 2. Запрос товаров из бота
-// =========================
-function loadProducts() {
-    tg.sendData(JSON.stringify({ action: "get_products" }));
+function goBack() {
+    pageStack.pop();
+    const last = pageStack[pageStack.length - 1] || showCategories;
+    last();
+    updateBackButton();
+}
+
+function updateBackButton() {
+    if (pageStack.length <= 1) {
+        backBtn.classList.add("hidden");
+    } else {
+        backBtn.classList.remove("hidden");
+    }
 }
 
 
-// =================================================
-// ПОКАЗ КАТЕГОРИЙ
-// =================================================
-function renderCategories() {
-    const div = document.getElementById("categories");
-    div.innerHTML = "";
+/* === ГЛАВНАЯ — КАТЕГОРИИ === */
+function showCategories() {
+    title.innerText = "Категории";
+    content.innerHTML = `<div class="grid two fade"></div>`;
+    const grid = content.querySelector(".grid");
 
     categories.forEach(cat => {
         const card = document.createElement("div");
@@ -34,86 +50,106 @@ function renderCategories() {
             <img src="${cat.image}" alt="">
             <h3>${cat.name}</h3>
         `;
-        card.onclick = () => showProductsByCategory(cat.id);
-        div.appendChild(card);
+        card.onclick = () => navigateTo(() => showProducts(cat.id));
+        grid.appendChild(card);
     });
 }
 
 
-// =================================================
-// ПОКАЗ ТОВАРОВ
-// =================================================
-function showProductsByCategory(catId) {
-    const div = document.getElementById("products");
-    div.innerHTML = "";
+/* === ТОВАРЫ КАТЕГОРИИ === */
+function showProducts(catId) {
+    title.innerText = "Товары";
 
     const filtered = products.filter(p => p.category_id === catId);
 
-    filtered.forEach(p => {
+    content.innerHTML = `<div class="grid two fade"></div>`;
+    const grid = content.querySelector(".grid");
+
+    filtered.forEach(prod => {
         const card = document.createElement("div");
         card.className = "card";
 
         card.innerHTML = `
-            <img src="${p.image}" alt="">
-            <h3>${p.name}</h3>
-            <p>${p.price} сомони</p>
-            <button>Добавить</button>
+            <img src="${prod.image}">
+            <h3>${prod.name}</h3>
+            <div class="price">${prod.price} сом</div>
         `;
 
-        card.querySelector("button").onclick = () => addToCart(p);
+        card.onclick = () => navigateTo(() => showProductPage(prod));
 
-        div.appendChild(card);
+        grid.appendChild(card);
     });
 }
 
 
-// =================================================
-// КОРЗИНА
-// =================================================
-function addToCart(product) {
-    cart.push(product);
-    tg.showPopup({ message: `${product.name} добавлен в корзину!` });
-    renderCart();
+/* === СТРАНИЦА ТОВАРА === */
+function showProductPage(product) {
+    title.innerText = product.name;
+
+    content.innerHTML = `
+        <div id="productPage" class="fade">
+            <img src="${product.image}">
+            <h2>${product.name}</h2>
+            <p>${product.description || ""}</p>
+            <div class="price">${product.price} сомони</div>
+            <button class="btn" id="addBtn">Добавить в корзину</button>
+        </div>
+    `;
+
+    document.getElementById("addBtn").onclick = () => {
+        cart.push(product);
+        tg.showPopup({ message: "Добавлено в корзину!" });
+    };
 }
 
-function renderCart() {
-    const div = document.getElementById("cart");
+
+/* === КОРЗИНА === */
+function showCart() {
+    title.innerText = "Корзина";
+
     if (cart.length === 0) {
-        div.innerHTML = "<p>Корзина пустая</p>";
+        content.innerHTML = `<h3 style="text-align:center">Корзина пустая</h3>`;
         return;
     }
 
     let total = 0;
+    let html = `<div class="fade" style="padding:10px">`;
 
-    let html = "<h3>Корзина:</h3>";
-    cart.forEach(item => {
-        html += `<p>${item.name} — ${item.price} сомони</p>`;
-        total += item.price;
+    cart.forEach((p, i) => {
+        total += p.price;
+        html += `
+            <div class="card" style="margin-bottom:10px">
+                <h3>${p.name}</h3>
+                <div class="price">${p.price} сом</div>
+                <button class="btn" onclick="removeItem(${i})">Удалить</button>
+            </div>
+        `;
     });
 
-    html += `<h3>Итого: ${total} сомони</h3>`;
-
     html += `
-        <input id="full_name" placeholder="Ваше имя">
-        <input id="phone" placeholder="Телефон">
-        <button id="order_btn">Оформить</button>
+        <h3>Итого: ${total} сом</h3>
+
+        <input id="full_name" placeholder="Имя" />
+        <input id="phone" placeholder="Телефон" />
+
+        <button class="btn" onclick="sendOrder()">Оформить</button>
+    </div>
     `;
 
-    div.innerHTML = html;
-
-    document.getElementById("order_btn").onclick = sendOrder;
+    content.innerHTML = html;
 }
 
+function removeItem(i) {
+    cart.splice(i, 1);
+    showCart();
+}
 
-// =================================================
-// ОТПРАВКА ЗАКАЗА
-// =================================================
 function sendOrder() {
     const name = document.getElementById("full_name").value;
     const phone = document.getElementById("phone").value;
 
     if (!name || !phone) {
-        tg.showPopup({ message: "Введите имя и телефон" });
+        tg.showPopup({ message: "Заполните имя и телефон" });
         return;
     }
 
@@ -126,17 +162,14 @@ function sendOrder() {
 }
 
 
-// =================================================
-// ПОЛУЧЕНИЕ ДАННЫХ ОТ БОТА
-// =================================================
-Telegram.WebApp.onEvent("message", function(msg) {
+/* === ПОЛУЧЕНИЕ ДАННЫХ ОТ БОТА === */
+Telegram.WebApp.onEvent("message", (msg) => {
     try {
         const data = JSON.parse(msg);
-        console.log("Получено:", data);
 
         if (data.action === "categories") {
             categories = data.data;
-            renderCategories();
+            showCategories();
         }
 
         if (data.action === "products") {
@@ -144,15 +177,19 @@ Telegram.WebApp.onEvent("message", function(msg) {
         }
 
     } catch (e) {
-        console.error("Ошибка JSON:", e);
+        console.error("JSON error:", e);
     }
 });
 
 
-// ========================
-// ПЕРВИЧНЫЕ ЗАПРОСЫ
-// ========================
+/* === КНОПКИ === */
+backBtn.onclick = goBack;
+cartBtn.onclick = () => navigateTo(showCart);
+
+
+/* === ПЕРВЫЕ ЗАПРОСЫ === */
 setTimeout(() => {
-    loadCategories();
-    loadProducts();
+    tg.sendData(JSON.stringify({ action: "get_categories" }));
+    tg.sendData(JSON.stringify({ action: "get_products" }));
+    pageStack = [showCategories];
 }, 300);
